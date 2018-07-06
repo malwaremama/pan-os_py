@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 DOCUMENTATION = '''
 ---
-short_description: this script will load the threat prevention security best practices to the PA-VMs.
+short_description: this script will load the Palo Alto Networks threat prevention security best practices to the PA-VMs.
 description: this script was written for use at the 2018 BSides LV in the Pros vs. Joes CTF. This script will update the PA-VMs that are a part of the cyber range to follow security best practices as well as detect L4-L7 evasion techniques. This is relevant for PAN-OS 8.0.X versioning.
 author: @malwaremama with a big frickin' slice of @p0lr_
 version: 1.0 - initial release WAHOO!
