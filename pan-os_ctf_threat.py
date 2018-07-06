@@ -2,12 +2,15 @@
 DOCUMENTATION = '''
 ---
 short_description: this script will load the threat prevention security best practices to the PA-VMs.
-description: this script was written for use at the 2018 BSides LV in the Pros vs. Joes CTF. This script will update the PA-VMs that are a part of the cyber range to follow security best practices as well as detect any L4-L7 evasion techniques. This is relevant for PAN-OS 8.0.X versioning.
+description: this script was written for use at the 2018 BSides LV in the Pros vs. Joes CTF. This script will update the PA-VMs that are a part of the cyber range to follow security best practices as well as detect L4-L7 evasion techniques. This is relevant for PAN-OS 8.0.X versioning.
 author: @malwaremama with a big frickin' slice of @p0lr_
 version: 1.0 - initial release WAHOO!
+         1.1 - fixed commit jobs status reporting
 requirements:
+    - this was written in Python3.6.
     - you will need Python and Requests installed.
     - you will need to have the blueteam_secrets.py in the same directory as this script.
+        [blueteam_secrets.py should contain the proper keys and host information in order to make the API calls to the PA-VMs]
 JUST_SEND_IT:
     - change access permissions 'chmod 755' of this file and run the script.
 '''
@@ -84,11 +87,12 @@ if commit == "y" or commit == "Y":
     r = requests.post(palocall, data=values, verify=False)
     tree = ET.fromstring(r.text)
     jobID = tree[0][1].text
-    print ("Commit job - ") + str(jobID)
+    print ("Commit job - " + str(jobID))
 
     committed = 0
     while (committed == 0):
-        values = {'type': 'op', 'cmd': '<show><jobs><id>{host}</id></jobs></show>', 'key': apiKey}
+        cmd = "<show><jobs><id>{jobid}</id></jobs></show>".format(jobid=jobID)
+        values = {'type': 'op', 'cmd': cmd, 'key': apiKey}
         palocall = 'https://{host}/api/'.format(host=fwHost)
         r = requests.post(palocall, data=values, verify=False)
         tree = ET.fromstring(r.text)
@@ -98,6 +102,6 @@ if commit == "y" or commit == "Y":
 
         else:
            status = "Commit status - " + str(tree[0][0][5].text) + " " + str(tree[0][0][12].text) + "% complete"
-           print ("{0}\r".format(0=status)),
+           print ("{0}\r".format(status)),
 else:
     print ("The changes have been made to the candidate configuration, but have not been committed.")
