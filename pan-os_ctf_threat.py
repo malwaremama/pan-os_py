@@ -21,8 +21,8 @@ requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
 import xml.etree.ElementTree as ET
 import blueteam_secrets
 
-# Input to define which credentials to use
-teamName = input("Which Blue Team firewall would you like to modify? [alpha/gamma/delta/epsilon]: ")
+# User input to define which credentials to use
+teamName = input("Which Blue Team firewall would you like to modify? [alpha/gamma/delta/epsilon]: ").lower()
 if teamName == 'alpha':
     fwHost = blueteam_secrets.alphaFWhost
     apiKey = blueteam_secrets.alphaAPIkey
@@ -80,9 +80,10 @@ print ("Updating {team}-admin administrator role".format(team=teamName) + '-' + 
 # Commit and Monitor Commit Job for Completion
 print ("*****************************************************************************")
 commit = input("Would you like to commit these changes? [y/n]: ")
-if commit == "y" or commit == "Y":
+if commit in ('y', 'Y'):
 
-    values = {'type': 'commit', 'cmd': '<commit><force></force></commit>', 'key': apiKey}
+    cmd = '<commit><force></force></commit>'
+    values = {'type': 'commit', 'cmd': cmd, 'key': apiKey}
     palocall = 'https://{host}/api/'.format(host=fwHost)
     r = requests.post(palocall, data=values, verify=False)
     tree = ET.fromstring(r.text)
@@ -91,7 +92,7 @@ if commit == "y" or commit == "Y":
 
     committed = 0
     while (committed == 0):
-        cmd = "<show><jobs><id>{jobid}</id></jobs></show>".format(jobid=jobID)
+        cmd = '<show><jobs><id>{jobid}</id></jobs></show>'.format(jobid=jobID)
         values = {'type': 'op', 'cmd': cmd, 'key': apiKey}
         palocall = 'https://{host}/api/'.format(host=fwHost)
         r = requests.post(palocall, data=values, verify=False)
@@ -101,7 +102,7 @@ if commit == "y" or commit == "Y":
             committed = 1
 
         else:
-           status = "Commit status - " + str(tree[0][0][5].text) + " " + str(tree[0][0][12].text) + "% complete"
-           print ("{0}\r".format(status)),
+           status = "Commit status - " + " " + str(tree[0][0][12].text) + "% complete"
+           print ('{0}\r'.format(status)),
 else:
     print ("The changes have been made to the candidate configuration, but have not been committed.")
